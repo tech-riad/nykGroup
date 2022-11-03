@@ -16,7 +16,8 @@ class PageController extends Controller
     public function index()
     {
         $page = Page::all();
-        return array('success'=> 200,  'data'=>$page);
+    
+        return view('page.index', compact('page'));
     }
 
     /**
@@ -26,7 +27,8 @@ class PageController extends Controller
      */
     public function create()
     {
-        //
+        $page = Page::all();
+        return view ('page.create', compact('page'));
     }
 
     /**
@@ -49,7 +51,7 @@ class PageController extends Controller
 
 
         $page->save();
-        return array('success'=> 200, 'data'=>$page);
+        return redirect()->route('page.index');
     }
 
     /**
@@ -60,7 +62,7 @@ class PageController extends Controller
      */
     public function show(Page $page)
     {
-        return array('success'=> 200, 'data'=>$page);
+        
     }
 
     /**
@@ -69,9 +71,10 @@ class PageController extends Controller
      * @param  \App\Models\Page  $page
      * @return \Illuminate\Http\Response
      */
-    public function edit(Page $page)
+    public function edit($id)
     {
-        //
+        $page = Page::find($id);
+        return view('page.edit', compact('page'));
     }
 
     /**
@@ -81,11 +84,20 @@ class PageController extends Controller
      * @param  \App\Models\Page  $page
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Page $page)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'title' => 'required',
+            'slug' => 'required',
+            'content' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            
+        ]);
+        $page = Page ::find($id);
         $page->title=$request->title;
         $page->slug=Str::slug($request->title);
         $page->content=$request->content;
+       
         if($request->image){
             $imageName = 'image_'.time().'.'.$request->image->extension();  
             $request->image->move(public_path('uploads'), $imageName);
@@ -94,7 +106,7 @@ class PageController extends Controller
 
 
         $page->save();
-        return array('success'=> 200, 'data'=>$page);
+        return redirect()->route('page.index');
     }
 
     /**
@@ -103,10 +115,12 @@ class PageController extends Controller
      * @param  \App\Models\Page  $page
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Page $page)
+    public function destroy($id)
     {
+        $page = Page::find($id);
+        @unlink(public_path($page->image));
         $page->delete();
-        $page = Page::all();
-        return array('status'=>200,'data'=>$page);
+
+        return redirect()->route('page.index')->with('success', 'Page Updated Successfully!');
     }
 }

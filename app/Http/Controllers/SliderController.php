@@ -16,7 +16,7 @@ class SliderController extends Controller
     public function index()
     {
         $slider = Slider::all();
-        return array('success'=> 200,  'data'=>$slider);
+        return view('slider.index', compact('slider'));
     }
 
     /**
@@ -26,7 +26,8 @@ class SliderController extends Controller
      */
     public function create()
     {
-        //
+        $slider = Slider::all();
+        return view ('slider.create', compact('slider'));
     }
 
     /**
@@ -37,7 +38,15 @@ class SliderController extends Controller
      */
     public function store(Request $request)
     {
-        $slider = new Slider();
+        $request->validate([
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'imagetitle' => 'required',
+            'description' => 'required',
+            
+            
+        ]);
+
+        $slider = new slider();
         if($request->image){
             $imageName = 'image_'.time().'.'.$request->image->extension();  
             $request->image->move(public_path('uploads/sliderimages'), $imageName);
@@ -45,13 +54,15 @@ class SliderController extends Controller
         }
 
         $slider->imagetitle=$request->imagetitle;
-        
         $slider->description=$request->description;
         
        
+       
 
         $slider->save();
-        return array('success'=> 200, 'data'=>$slider);
+        
+       
+        return redirect()->route('slider.index');
     }
 
     /**
@@ -71,9 +82,10 @@ class SliderController extends Controller
      * @param  \App\Models\Slider  $slider
      * @return \Illuminate\Http\Response
      */
-    public function edit(Slider $slider)
+    public function edit($id)
     {
-        //
+        $slider = Slider::find($id);
+        return view('slider.edit', compact('slider'));
     }
 
     /**
@@ -83,8 +95,17 @@ class SliderController extends Controller
      * @param  \App\Models\Slider  $slider
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Slider $slider)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            'imagetitle' => 'required',
+            'description' => 'required',
+            
+            
+        ]);
+        $slider = Slider ::find($id);
+
         if($request->image){
             $imageName = 'image_'.time().'.'.$request->image->extension();  
             $request->image->move(public_path('uploads/sliderimages'), $imageName);
@@ -98,7 +119,7 @@ class SliderController extends Controller
        
 
         $slider->save();
-        return array('success'=> 200, 'data'=>$slider);
+        return redirect()->route('slider.index');
     }
 
     /**
@@ -107,10 +128,12 @@ class SliderController extends Controller
      * @param  \App\Models\Slider  $slider
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Slider $slider)
+    public function destroy($id)
     {
+        $slider = Slider::find($id);
+        @unlink(public_path($slider->image));
         $slider->delete();
-        $slider = Slider::all();
-        return array('status'=>200,'message'=>'slider deleted','data'=>$slider);
+
+        return redirect()->route('slider.index')->with('success', 'Slider Updated Successfully!');
     }
 }

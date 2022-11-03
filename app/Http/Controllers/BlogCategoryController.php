@@ -17,7 +17,7 @@ class BlogCategoryController extends Controller
     public function index()
     {
         $blogcategory = BlogCategory::all();
-        return array('success'=> 200,  'data'=>$blogcategory);
+        return view('blogcategory.index', compact('blogcategory'));
     }
 
     /**
@@ -27,7 +27,7 @@ class BlogCategoryController extends Controller
      */
     public function create()
     {
-        //
+        return view ('blogcategory.create');
     }
 
     /**
@@ -43,7 +43,8 @@ class BlogCategoryController extends Controller
         $blogcategory->slug=Str::slug( $request->name);
         $blogcategory->save();
 
-        return array('success'=> 200,  'data'=>$blogcategory);
+        
+        return redirect()->route('blogcategory.index');
     }
 
     /**
@@ -63,9 +64,10 @@ class BlogCategoryController extends Controller
      * @param  \App\Models\BlogCategory  $blogCategory
      * @return \Illuminate\Http\Response
      */
-    public function edit(BlogCategory $blogCategory)
+    public function edit($id)
     {
-        //
+        $blogcategory = BlogCategory::find($id);
+        return view('blogcategory.edit', compact('blogcategory'));
     }
 
     /**
@@ -75,13 +77,14 @@ class BlogCategoryController extends Controller
      * @param  \App\Models\BlogCategory  $blogCategory
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, BlogCategory $blogcategory)
+    public function update(Request $request,$id)
     {
+        $blogcategory = BlogCategory ::find($id);
         $blogcategory->name=$request->name;
         $blogcategory->slug=Str::slug( $request->name);
         $blogcategory->save();
 
-        return array('success'=> 200,  'data'=>$blogcategory);
+        return redirect()->route('blogcategory.index');
     }
 
     /**
@@ -90,11 +93,12 @@ class BlogCategoryController extends Controller
      * @param  \App\Models\BlogCategory  $blogCategory
      * @return \Illuminate\Http\Response
      */
-    public function destroy(BlogCategory $blogcategory)
+    public function destroy( $id)
     {
         
+        $blogcategory = BlogCategory::find($id);
         $blogcategory->delete();
-        $blogcategory = BlogCategory::all();
-        return array('status'=>200,'message'=>'blogcategory deleted','data'=>$blogcategory);
+
+        return redirect()->route('blogcategory.index')->with('success', 'Blog Updated Successfully!');
     }
 }
