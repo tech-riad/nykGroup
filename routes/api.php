@@ -17,10 +17,10 @@ use App\Http\Controllers\SliderController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::resource('blogcategory', 'App\Http\Controllers\BlogCategoryController');
-Route::resource('blog', 'App\Http\Controllers\BlogController');
-Route::resource('page', 'App\Http\Controllers\PageController');
-Route::resource('slider', 'App\Http\Controllers\SliderController');
+// Route::resource('blogcategory', 'App\Http\Controllers\BlogCategoryController');
+// Route::resource('blog', 'App\Http\Controllers\BlogController');
+// Route::resource('page', 'App\Http\Controllers\PageController');
+// Route::resource('slider', 'App\Http\Controllers\SliderController');
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

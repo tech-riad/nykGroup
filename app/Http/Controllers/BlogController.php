@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\BlogCategory;
 
 class BlogController extends Controller
 {
+ 
+
+
     /**
      * Display a listing of the resource.
      *
@@ -16,7 +20,11 @@ class BlogController extends Controller
     public function index()
     {
         $blog = Blog::all();
-        return array('success'=> 200,  'data'=>$blog);
+        $blogcategory = BlogCategory::all();
+        
+        
+        return view('blog.index', compact('blog','blogcategory'));
+        
     }
 
     /**
@@ -26,7 +34,8 @@ class BlogController extends Controller
      */
     public function create()
     {
-        //
+        $blogcategory = BlogCategory::all();
+        return view ('blog.create', compact('blogcategory'));
     }
 
     /**
@@ -37,11 +46,20 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => 'required',
+            'slug' => 'required',
+            'content' => 'required',
+            'category_id' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            
+        ]);
         $blog = new Blog();
         $blog->title=$request->title;
         $blog->slug=Str::slug($request->title);
         $blog->content=$request->content;
         $blog->category_id=$request->category_id;
+       
         if($request->image){
             $imageName = 'image_'.time().'.'.$request->image->extension();  
             $request->image->move(public_path('uploads'), $imageName);
@@ -50,7 +68,10 @@ class BlogController extends Controller
 
 
         $blog->save();
-        return array('success'=> 200, 'data'=>$blog);
+        
+       
+        return redirect()->route('blog.index');
+        // return array('success'=> 200, 'data'=>$blog);
     }
 
     /**
@@ -59,9 +80,9 @@ class BlogController extends Controller
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Http\Response
      */
-    public function show(Blog $blog)
+    public function show($id)
     {
-        return array('success'=> 200,  'data'=>$blog);
+        
     }
 
     /**
@@ -70,9 +91,12 @@ class BlogController extends Controller
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Http\Response
      */
-    public function edit(Blog $blog)
+    public function edit($id)
     {
-        //
+       
+        $blog = Blog::find($id);
+        $blogcategory = BlogCategory::all();
+        return view('blog.edit', compact('blog','blogcategory'));
     }
 
     /**
@@ -82,12 +106,22 @@ class BlogController extends Controller
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Blog $blog)
+    public function update(Request $request,$id)
     {
+        $request->validate([
+            'title' => 'required',
+            'slug' => 'required',
+            'content' => 'required',
+            'category_id' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:20048',
+            
+        ]);
+        $blog = Blog ::find($id);
         $blog->title=$request->title;
         $blog->slug=Str::slug($request->title);
         $blog->content=$request->content;
         $blog->category_id=$request->category_id;
+       
         if($request->image){
             $imageName = 'image_'.time().'.'.$request->image->extension();  
             $request->image->move(public_path('uploads'), $imageName);
@@ -96,7 +130,7 @@ class BlogController extends Controller
 
 
         $blog->save();
-        return array('success'=> 200, 'data'=>$blog);
+        return redirect()->route('blog.index');
     }
 
     /**
@@ -105,10 +139,12 @@ class BlogController extends Controller
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Blog $blog)
+    public function destroy( $id)
     {
+        $blog = Blog::find($id);
+        @unlink(public_path($blog->image));
         $blog->delete();
-        $blog = Blog::all();
-        return array('status'=>200,'message'=>'Blog deleted','data'=>$blog);
+
+        return redirect()->route('blog.index')->with('success', 'Blog Updated Successfully!');
     }
 }
